@@ -9,7 +9,7 @@
 #include "db_parser.h"
 #include "product_parser.h"
 #include "util.h"
-
+#include "mydatastore.h"
 using namespace std;
 struct ProdNameSorter {
     bool operator()(Product* p1, Product* p2) {
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
      * Declare your derived DataStore object here replacing
      *  DataStore type to your derived type
      ****************/
-    DataStore ds;
+    MyDataStore ds;
 
 
 
@@ -100,10 +100,49 @@ int main(int argc, char* argv[])
                 done = true;
             }
 	    /* Add support for other commands here */
+            else if(cmd == "ADD"){
+              string username;
+              int hitNumber;
 
+              if(!(ss >> username >> hitNumber)){
+                cout << "Invalid request" << endl;
+              }
+              else if(hitNumber < 1 || hitNumber > (int)hits.size()){
+                cout << "Invalid request" << endl;
+              }
+              else if(!ds.addToCart(username, hits[hitNumber - 1])){
+                cout << "Invalid request" << endl;
+              }
+            }
+            else if(cmd == "VIEWCART"){
+              string username;
+              if(!(ss >> username)){
+                cout << "Invalid username" << endl;
+              }
+              else {
+                vector<Product*> cart = ds.viewCart(username);
+                if(cart.empty() && !ds.userExists(username)){
+                  cout << "Invalid username" << endl;
+                }
+                else {
+                  for(unsigned int i = 0; i < cart.size(); i++){
+                    cout << "Item " << i + 1 << endl;
+                    cout << cart[i]->displayString() << endl;
+                    cout << endl;
+                  }
+                }
+              }
+            }
+            else if(cmd == "BUYCART"){
+              string username;
 
-
-
+              if(!(ss >> username)){
+                cout << "Invalid username" << endl;
+              }
+              else if(!ds.buyCart(username)){
+                cout << "Invalid username" << endl;
+              }
+            }
             else {
                 cout << "Unknown command" << endl;
             }
